@@ -1,0 +1,63 @@
+{
+  "name": "com.anyg.brg-rendersystem",
+  "version": "0.0.1",
+  "displayName": "BRG Render System",
+  "description": "Focuses on rendering a large number of static (or rarely modified) scene objects with lower CPU overhead by using BatchRendererGroup.",
+  "_upm": {
+    "supportedPlatforms": [
+      "Desktop",
+      "Mobile",
+      "Consoles"
+    ]
+  },
+  "unity": "2022.3",
+  "unityRelease": "33f1",
+  "license": "MIT",
+  "dependencies": {
+    "com.unity.burst": "1.8.24",
+    "com.unity.collections": "2.5.7",
+    "com.unity.mathematics": "1.3.2",
+    "com.unity.render-pipelines.universal": "14.0.12"
+  },
+  "keywords": [
+    "brg",
+    "rendering",
+    "tool"
+  ],
+  "author": {
+    "name": "LizzyFox",
+    "url": "https://github.com/LizzyFox-code"
+  },
+  "samples": [
+    {
+      "displayName": "Hello World",
+      "description": "A minimalist Hello World sample created with BRG Container tool.",
+      "path": "Samples~/HelloWorld"
+    },
+    {
+      "displayName": "Create BRG",
+      "description": "A simple sample that shows how to create a BRG Container instance.",
+      "path": "Samples~/CreateBRG"
+    },
+    {
+      "displayName": "Create Batch",
+      "description": "A simple sample that shows how to create a batch for drawing some objects.",
+      "path": "Samples~/CreateBatch"
+    },
+    {
+      "displayName": "Batch Data Buffer",
+      "description": "A sample that shows how to set and read instance data.",
+      "path": "Samples~/BatchDataBuffer"
+    },
+    {
+      "displayName": "Material Properties",
+      "description": "A sample that shows how to use material properties.",
+      "path": "Samples~/MaterialProperties"
+    },
+    {
+      "displayName": "LOD",
+      "description": "A sample that shows how to add LOD support.",
+      "path": "Samples~/LOD"
+    }
+  ]
+}
