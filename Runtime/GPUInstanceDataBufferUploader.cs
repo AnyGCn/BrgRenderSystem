@@ -171,7 +171,8 @@ namespace BrgRenderSystem
 
             int instanceCount = m_SrcBuffer.instanceCount;
 
-            if(instanceCount == 0)
+            // In UBO Mode, data was always rebuild when instances were changed, so there are no need to copy data here.
+            if(instanceCount == 0 || GPUInstanceDataBuffer.IsUBO)
                 return m_DstBuffer;
 
             Assert.IsTrue(m_SrcBuffer.perInstanceComponentCount == m_DstBuffer.perInstanceComponentCount);

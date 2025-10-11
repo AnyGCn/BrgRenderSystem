@@ -349,6 +349,7 @@ namespace BrgRenderSystem
     internal struct CreateDrawBatchesJob : IJob
     {
         // [ReadOnly] public bool implicitInstanceIndices;
+        [ReadOnly] public bool isUBOMode;
         [ReadOnly] public NativeArray<InstanceHandle> instances;
         [ReadOnly] public NativeParallelHashMap<int, BatchMeshID>.ReadOnly batchMeshHash;
         [ReadOnly] public NativeParallelHashMap<int, BatchMaterialID>.ReadOnly batchMaterialHash;
@@ -508,8 +509,16 @@ namespace BrgRenderSystem
         
         public void Execute()
         {
-            for (int i = 0; i < instances.Length; ++i)
-                ProcessInstance(instances[i]);
+            if (isUBOMode)
+            {
+                for (int i = 0; i < instanceData.instancesLength; ++i)
+                    ProcessInstance(instanceData.instances[i]);
+            }
+            else
+            {
+                for (int i = 0; i < instances.Length; ++i)
+                    ProcessInstance(instances[i]);
+            }
         }
     }
     
@@ -1052,6 +1061,7 @@ namespace BrgRenderSystem
             new CreateDrawBatchesJob
             {
                 // implicitInstanceIndices = rendererData.instancesCount.Length == 0,
+                isUBOMode = GPUInstanceDataBuffer.IsUBO,
                 instances = instances,
                 instanceData = m_BatchersContext.instanceData,
                 sharedInstanceData = m_BatchersContext.sharedInstanceData,
