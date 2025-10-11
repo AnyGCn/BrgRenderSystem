@@ -875,7 +875,7 @@ namespace BrgRenderSystem
             public void Execute()
             {
                 NativeParallelHashMap<int, int> batchHashMap = new NativeParallelHashMap<int, int>(128, Allocator.Temp);
-                for (int i = 0; i < instanceData.handlesLength; ++i)
+                for (int i = 0; i < instanceData.instancesLength; ++i)
                 {
                     SharedInstanceHandle sharedInstanceHandle = instanceData.sharedInstances[i];
                     int sharedIndex = sharedInstanceData.SharedInstanceToIndex(sharedInstanceHandle);
@@ -939,7 +939,7 @@ namespace BrgRenderSystem
             {
                 InstanceHandle instance = instances[index];
                 int instanceIndex = instanceData.InstanceToIndex(instance);
-                byte* gpuAddress = (byte*)outputBuffer.GetUnsafePtr() + instanceIndex * UnsafeUtility.SizeOf<PackedMatrix>();
+                byte* gpuAddress = (byte*)outputBuffer.GetUnsafePtr() + instanceData.gpuInstances[instanceIndex].index * UnsafeUtility.SizeOf<PackedMatrix>();
                 UnsafeUtility.CopyStructureToPtr(ref UnsafeUtility.ArrayElementAsRef<PackedMatrix>(instanceData.localToWorlds.GetUnsafeReadOnlyPtr(), instanceIndex), gpuAddress + localToWorldMatrixOffset);
                 UnsafeUtility.CopyStructureToPtr(ref UnsafeUtility.ArrayElementAsRef<PackedMatrix>(instanceData.worldToLocals.GetUnsafeReadOnlyPtr(), instanceIndex), gpuAddress + worldToLocalMatrixOffset);
             }

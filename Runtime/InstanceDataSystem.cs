@@ -320,7 +320,7 @@ namespace BrgRenderSystem
                     localToWorldMatrixOffset = renderersParameters.localToWorld.gpuAddress,
                     worldToLocalMatrixOffset = renderersParameters.worldToLocal.gpuAddress,
                     outputBuffer = instanceDataBuffer.nativeBuffer,
-                }.Schedule(m_InstanceData.handlesLength, UpdateGPUInstanceData.k_BatchSize).Complete();
+                }.Schedule(m_InstanceData.instancesLength, UpdateGPUInstanceData.k_BatchSize).Complete();
                 
                 rangesList.Dispose();
             }

@@ -28,8 +28,9 @@ namespace BrgRenderSystem.Tests
         
         private ResidentDrawer residentDrawer;
 
+        private int lodGroupIdAllocator = 0;
+        private int meshRendererIdAllocator = 0;
         private Dictionary<LODGroup, int> lodGroupIDMap = new Dictionary<LODGroup, int>();
-
         private Dictionary<MeshRenderer, int> meshRendererIDMap = new Dictionary<MeshRenderer, int>();
 
         // Start is called before the first frame update
@@ -51,7 +52,7 @@ namespace BrgRenderSystem.Tests
             if (lodGroupIDMap.ContainsKey(lodGroup))
                 return;
 
-            int lodGroupId = lodGroupIDMap.Count;
+            int lodGroupId = lodGroupIdAllocator++;
             item.lodGroupID = lodGroupId;
             lodGroupIDMap.Add(lodGroup, lodGroupId);
             residentDrawer.RegisterLodGroup(ref item);
@@ -63,7 +64,7 @@ namespace BrgRenderSystem.Tests
                 return;
 
             int rendererGroupId = meshRendererIDMap.Count;
-            item.rendererGroupID = rendererGroupId;
+            item.rendererGroupID = meshRendererIdAllocator++;
             meshRendererIDMap.Add(meshRenderer, rendererGroupId);
             residentDrawer.RegisterRendererGroup(ref item);
         }

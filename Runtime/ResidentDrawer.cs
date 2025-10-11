@@ -438,11 +438,11 @@ namespace BrgRenderSystem
         private void ProcessRenderers()
         {
             RendererGroupInputData.ReadOnly rendererData = m_SceneDataProcessor.rendererInputData.AsReadOnly();
-            if (rendererData.rendererGroupID.Length == 0)
+            if (rendererData.rendererGroupID.Length == 0 && rendererData.invalidRendererGroupID.Length == 0)
                 return;
             
             // In UBO Mode, draw instance data would be rebuilt totally after instance update.
-            if (!GPUInstanceDataBuffer.IsUBO)
+            if (!GPUInstanceDataBuffer.IsUBO && rendererData.rendererGroupID.Length > 0)
             {
                 var changedInstances = new NativeArray<InstanceHandle>(rendererData.rendererGroupID.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
                 ScheduleQueryRendererGroupInstancesJob(rendererData, changedInstances).Complete();

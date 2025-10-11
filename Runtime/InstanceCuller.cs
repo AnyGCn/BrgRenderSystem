@@ -763,7 +763,7 @@ namespace BrgRenderSystem
 
         unsafe int EncodeGPUInstanceIndexAndCrossFade(int rendererIndex, bool negateCrossFade)
         {
-            var gpuInstanceIndex = instanceData.gpuInstances[rendererIndex].index;
+            var gpuInstanceIndex = instanceData.gpuInstances[instanceData.InstanceToIndex(InstanceHandle.FromInt(rendererIndex))].index;
             int crossFadeValue = rendererCrossFadeValues[rendererIndex];
             crossFadeValue -= 127;
             if (negateCrossFade)
@@ -1146,7 +1146,7 @@ namespace BrgRenderSystem
                         // if (!batchIDs.ContainsKey(drawBatch.key.overridenComponents))
                         //     throw new Exception("Draw command created with an invalid BatchID");
 #endif
-                        output.visibleInstances[outVisibleInstanceIndex] = instanceData.gpuInstances[instance.index].index;
+                        output.visibleInstances[outVisibleInstanceIndex] = instanceData.gpuInstances[instanceData.InstanceToIndex(instance)].index;
                         output.drawCommandPickingInstanceIDs[outCommandIndex] = rendererID;
                         output.drawCommands[outCommandIndex] = new BatchDrawCommand
                         {

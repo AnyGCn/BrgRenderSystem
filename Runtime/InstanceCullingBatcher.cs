@@ -406,9 +406,9 @@ namespace BrgRenderSystem
             return ref data;
         }
 
-        public void ProcessInstance(InstanceHandle instanceHandle)
+        public void ProcessInstance(InstanceHandle instance)
         {
-            int index = instanceHandle.index;
+            int index = instanceData.instanceIndices[instance.index];
             int sharedIndex = sharedInstanceData.SharedInstanceToIndex(instanceData.sharedInstances[index]);
             var meshID = sharedInstanceData.meshIDs[sharedIndex];
             // var submeshCount = rendererData.subMeshCount[meshIndex];
@@ -501,7 +501,7 @@ namespace BrgRenderSystem
                         ++drawRange.drawCount;
 
                     drawBatch.instanceCount++;
-                    drawInstances.Add(new DrawInstance { key = drawKey, instanceIndex = index });
+                    drawInstances.Add(new DrawInstance { key = drawKey, instanceIndex = instance.index });
                 }
             }
 
@@ -1135,9 +1135,7 @@ namespace BrgRenderSystem
 
         public void UpdateRenderers(RendererGroupInputData.ReadOnly rendererData, bool materialUpdateOnly = false)
         {
-            // In UBO Mode, draw instance data would be rebuilt totally after instance update.
-            if (!GPUInstanceDataBuffer.IsUBO)
-                FreeRendererGroupInstances(rendererData.invalidRendererGroupID);
+            FreeRendererGroupInstances(rendererData.invalidRendererGroupID);
             
             if (rendererData.rendererGroupID.Length == 0)
                 return;
