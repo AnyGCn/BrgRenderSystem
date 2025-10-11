@@ -92,6 +92,7 @@ namespace BrgRenderSystem
         // public NativeArray<int> materialFilterFlags;
         
         public bool isValid => rendererGroupID != -1;
+        public byte lodMask { get => packedRendererData.lodMask; set => packedRendererData.lodMask = value; }
 
         public RendererGroupItem(int materialsCount)
         {

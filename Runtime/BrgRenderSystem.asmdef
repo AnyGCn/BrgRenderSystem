@@ -1,6 +1,6 @@
 {
-    "name": "ResidentDrawer",
-    "rootNamespace": "ResidentDrawer",
+    "name": "BrgRenderSystem",
+    "rootNamespace": "BrgRenderSystem",
     "references": [
         "Unity.Burst",
         "Unity.Collections",

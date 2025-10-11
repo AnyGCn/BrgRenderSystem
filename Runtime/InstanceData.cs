@@ -109,7 +109,15 @@ namespace BrgRenderSystem
 
         public bool staticShadowCaster => (this.data & 2U) > 0U;
 
-        public byte lodMask => (byte) (this.data >> 2 & (uint) byte.MaxValue);
+        public byte lodMask
+        {
+            get => (byte)(this.data >> 2 & (uint)byte.MaxValue);
+            set
+            {
+                this.data &= 0xFFFFFC03U;
+                this.data |= (uint) value << 2;
+            }
+        }
 
         public ShadowCastingMode shadowCastingMode => (ShadowCastingMode) ((int) (this.data >> 10) & 3);
 
