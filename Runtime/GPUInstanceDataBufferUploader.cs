@@ -164,7 +164,7 @@ namespace BrgRenderSystem
         /// CPU Copy
         /// </summary>
         /// <returns></returns>
-        public GPUInstanceDataBuffer SubmitToCpu()
+        public unsafe GPUInstanceDataBuffer SubmitToCpu()
         {
             if (m_DstBuffer == null)
                 return m_SrcBuffer;
@@ -175,8 +175,14 @@ namespace BrgRenderSystem
                 return m_DstBuffer;
 
             Assert.IsTrue(m_SrcBuffer.perInstanceComponentCount == m_DstBuffer.perInstanceComponentCount);
+            for (int i = 0; i < m_SrcBuffer.perInstanceComponentCount; ++i)
+            {
+                int srcBegin = m_SrcBuffer.gpuBufferComponentAddress[i];
+                int dstBegin = m_DstBuffer.gpuBufferComponentAddress[i];
+                int srcEnd = (i + 1) < m_SrcBuffer.perInstanceComponentCount ? m_SrcBuffer.gpuBufferComponentAddress[i + 1] : m_SrcBuffer.byteSize;
+                UnsafeUtility.MemCpy((byte*)m_DstBuffer.nativeBuffer.GetUnsafePtr() + dstBegin, (byte*)m_SrcBuffer.nativeBuffer.GetUnsafeReadOnlyPtr() + srcBegin, srcEnd - srcBegin);
+            }
             
-            m_DstBuffer.nativeBuffer.GetSubArray(0, m_SrcBuffer.nativeBuffer.Length).CopyFrom(m_SrcBuffer.nativeBuffer);
             return m_DstBuffer;
         }
 
