@@ -148,6 +148,12 @@ namespace BrgRenderSystem
         {
             Reinitialize();
         }
+
+        public bool enabled
+        {
+            get => m_BatchersContext.enabled;
+            set => m_BatchersContext.enabled = value;
+        }
         
         public void RegisterLodGroup(ref LODGroupItem lodGroup)
         {

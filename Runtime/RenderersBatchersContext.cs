@@ -100,6 +100,7 @@ namespace BrgRenderSystem
             get { return m_SmallMeshScreenPercentage; }
         }
 
+        public bool enabled { get; set; } = true;
         private InstanceDataSystem m_InstanceDataSystem;
 
         private LODGroupDataPool m_LODGroupDataPool;
