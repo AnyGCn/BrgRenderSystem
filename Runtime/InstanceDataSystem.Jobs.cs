@@ -720,7 +720,8 @@ namespace BrgRenderSystem
                         bool isFlipped = (det < 0.0f);
 
                         int instanceIndex = instanceData.InstanceToIndex(instance);
-                        instanceData.gpuInstances[instanceIndex] = new GPUInstanceIndex(instanceIndex);
+                        // gpu instance should be unique.
+                        instanceData.gpuInstances[instanceIndex] = new GPUInstanceIndex(instance.index);
                         instanceData.localToWorldIsFlippedBits.Set(instanceIndex, isFlipped);
                         instanceData.worldAABBs[instanceIndex] = worldAABB;
                         instanceData.lodGroupAndMasks[instanceIndex] = lodGroupAndMask;
