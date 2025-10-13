@@ -52,9 +52,8 @@ namespace BrgRenderSystem.Tests
             if (lodGroupIDMap.ContainsKey(lodGroup))
                 return;
 
-            int lodGroupId = lodGroupIdAllocator++;
-            item.lodGroupID = lodGroupId;
-            lodGroupIDMap.Add(lodGroup, lodGroupId);
+            item.lodGroupID = lodGroupIdAllocator++;
+            lodGroupIDMap.Add(lodGroup, item.lodGroupID);
             residentDrawer.RegisterLodGroup(ref item);
         }
 
@@ -63,9 +62,8 @@ namespace BrgRenderSystem.Tests
             if (meshRendererIDMap.ContainsKey(meshRenderer))
                 return;
 
-            int rendererGroupId = meshRendererIDMap.Count;
             item.rendererGroupID = meshRendererIdAllocator++;
-            meshRendererIDMap.Add(meshRenderer, rendererGroupId);
+            meshRendererIDMap.Add(meshRenderer, item.rendererGroupID);
             residentDrawer.RegisterRendererGroup(ref item);
         }
 
