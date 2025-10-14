@@ -875,6 +875,9 @@ namespace BrgRenderSystem
             BatchCullingOutput cullingOutput,
             IntPtr userContext)
         {
+            if (!m_BatchersContext.enabled)
+                return new JobHandle();
+            
             if (!m_GlobalBatchIDs.IsCreated)
                 return new JobHandle();
             
