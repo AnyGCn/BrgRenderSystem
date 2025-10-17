@@ -15,6 +15,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 namespace BrgRenderSystem
@@ -189,6 +190,7 @@ namespace BrgRenderSystem
         [ReadOnly] public float minScreenRelativeHeight;
         [ReadOnly] public bool isOrtho;
         [ReadOnly] public bool cullLightmappedShadowCasters;
+        [ReadOnly] public bool isOcclusionTest;
         [ReadOnly] public int maxLOD;
         [ReadOnly] public uint cullingLayerMask;
         [ReadOnly] public ulong sceneCullingMask;
@@ -202,6 +204,7 @@ namespace BrgRenderSystem
         [ReadOnly] public CPUInstanceData.ReadOnly instanceData;
         [ReadOnly] public CPUSharedInstanceData.ReadOnly sharedInstanceData;
         [NativeDisableContainerSafetyRestriction, NoAlias] [ReadOnly] public NativeList<LODGroupCullingData> lodGroupCullingData;
+        [NativeDisableContainerSafetyRestriction] [ReadOnly] public OcclusionCullingProcessor occlusionBuffer;
         // [NativeDisableUnsafePtrRestriction] [ReadOnly] public IntPtr occlusionBuffer;
 
         [NativeDisableParallelForRestriction][WriteOnly] public NativeArray<byte> rendererVisibilityMasks;
@@ -369,8 +372,8 @@ namespace BrgRenderSystem
                 visibilityMask &= ReceiverSphereCuller.ComputeSplitVisibilityMask(lightFacingFrustumPlanes, receiverSplitInfos, worldToLightSpaceRotation, worldAABB);
 
             // Perform an occlusion test on the instance bounds if we have an occlusion buffer available and the instance is still visible
-            // if (visibilityMask != 0 && occlusionBuffer != IntPtr.Zero)
-            //     visibilityMask = BatchRendererGroup.OcclusionTestAABB(occlusionBuffer, worldAABB.ToBounds()) ? visibilityMask : 0;
+            if (visibilityMask != 0 && isOcclusionTest)
+                visibilityMask = occlusionBuffer.IsOcclusionVisible(worldAABB.center, math.length(worldAABB.extents)) ? visibilityMask : 0;
 
             return visibilityMask;
         }
@@ -1604,6 +1607,9 @@ namespace BrgRenderSystem
 
             // if (occlusionCullingCommon != null)
             //     occlusionCullingCommon.UpdateSilhouettePlanes(cc.viewID.GetInstanceID(), receiverPlanes.SilhouettePlaneSubArray());
+            OcclusionCullingProcessor occlusionBuffer = default;
+             if (cc.viewType == BatchCullingViewType.Camera)
+                 occlusionBuffer = OcclusionCullingProcessor.Create(cc.viewID.GetInstanceID());
 
             var cullingJob = new CullingJob
             {
@@ -1628,7 +1634,8 @@ namespace BrgRenderSystem
                 maxLOD = QualitySettings.maximumLODLevel,
                 cullingLayerMask = cc.cullingLayerMask,
                 sceneCullingMask = cc.sceneCullingMask,
-
+                isOcclusionTest = occlusionBuffer.valid,
+                occlusionBuffer = occlusionBuffer.valid ? occlusionBuffer : default,
             }.Schedule(instanceData.instancesLength, CullingJob.k_BatchSize);
 
             receiverPlanes.Dispose(cullingJob);

@@ -5,7 +5,8 @@
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Mathematics",
-        "Unity.RenderPipelines.Core.Runtime"
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -14,6 +15,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "[14.0.99]",
+            "define": "_URP_ANYG_EXTENSIONS"
+        }
+    ],
     "noEngineReferences": false
 }
