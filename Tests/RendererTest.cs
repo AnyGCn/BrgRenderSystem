@@ -1,40 +1,44 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
-// using UnityEditor;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using Assert = UnityEngine.Assertions.Assert;
 
 namespace BrgRenderSystem.Tests
 {
-    public class RendererTest
+    public class RendererTest : IPrebuildSetup, IPostBuildCleanup
     {
+        private const string k_SceneName = "Packages/com.anyg.brg-rendersystem/Tests/Test.unity";
+        private string lastScene;
         private float lastLodBias = 1;
         private int lastVSyncCount = 0;
         private int lastTargetFrameRate = 60;
-        public static readonly string packagePath = "Packages/com.anyg.brg-rendersystem";
         
-        [SetUp]
-        public void Setup()
+        [UnitySetUp]
+        public IEnumerator BeforeTest()
         {
             lastLodBias = QualitySettings.lodBias;
             lastVSyncCount = QualitySettings.vSyncCount;
             lastTargetFrameRate = Application.targetFrameRate;
+            // lastScene = SceneManager.GetActiveScene().path;
             QualitySettings.lodBias = 1;
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 60;
-            SceneManager.LoadScene($"{packagePath}/Tests/Test.unity");
+            SceneManager.LoadScene(k_SceneName);
+            yield return null;
         }
         
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             QualitySettings.lodBias = lastLodBias;
             QualitySettings.vSyncCount = lastVSyncCount;
             Application.targetFrameRate = lastTargetFrameRate;
+            // SceneManager.LoadScene(lastScene);
+            yield return null;
         }
         
         // Ensure that render content are correctly set in the renderer group.
@@ -106,6 +110,27 @@ namespace BrgRenderSystem.Tests
                 for (int i = 0; i < testArraySize; ++i)
                     yield return null;
             }
+        }
+        
+        public void Setup()
+        {
+#if UNITY_EDITOR
+            if (EditorBuildSettings.scenes.Any(scene => scene.path == k_SceneName))
+            {
+                return;
+            }
+            
+            var includedScenes = EditorBuildSettings.scenes.ToList();
+            includedScenes.Add(new EditorBuildSettingsScene(k_SceneName, true));
+            EditorBuildSettings.scenes = includedScenes.ToArray();
+#endif
+        }
+        
+        public void Cleanup()
+        {
+#if UNITY_EDITOR
+            EditorBuildSettings.scenes = EditorBuildSettings.scenes.Where(scene => scene.path != k_SceneName).ToArray();
+#endif
         }
     }
 }
