@@ -890,6 +890,9 @@ namespace BrgRenderSystem
             m_DrawInstanceData.RebuildDrawListsIfNeeded();
 
             bool allowOcclusionCulling = m_BatchersContext.hasBoundingSpheres;
+            OcclusionCullingProcessor occlusionBuffer = default;
+            if (cc.viewType == BatchCullingViewType.Camera && m_BatchersContext.occlusionCulling)
+                occlusionBuffer = OcclusionCullingProcessor.Create(cc.viewID.GetInstanceID());
             JobHandle jobHandle = m_Culler.CreateCullJobTree(
                 cc,
                 cullingOutput,
@@ -900,7 +903,7 @@ namespace BrgRenderSystem
                 m_GlobalBatchIDs,
                 m_BatchersContext.crossfadedRendererCount,
                 m_BatchersContext.smallMeshScreenPercentage,
-                null);
+                occlusionBuffer);
 
             if (m_OnCompleteCallback != null)
                 m_OnCompleteCallback(jobHandle, cc, cullingOutput);

@@ -373,7 +373,7 @@ namespace BrgRenderSystem
 
             // Perform an occlusion test on the instance bounds if we have an occlusion buffer available and the instance is still visible
             if (visibilityMask != 0 && isOcclusionTest)
-                visibilityMask = occlusionBuffer.IsOcclusionVisible(worldAABB.center, math.length(worldAABB.extents)) ? visibilityMask : 0;
+                visibilityMask = occlusionBuffer.IsOcclusionVisible(worldAABB) ? visibilityMask : 0;
 
             return visibilityMask;
         }
@@ -1580,7 +1580,7 @@ namespace BrgRenderSystem
             NativeList<LODGroupCullingData> lodGroupCullingData,
             in BinningConfig binningConfig,
             float smallMeshScreenPercentage,
-            OcclusionCullingCommon occlusionCullingCommon,
+            OcclusionCullingProcessor occlusionCullingCommon,
             NativeArray<byte> rendererVisibilityMasks,
             NativeArray<byte> rendererCrossFadeValues)
         {
@@ -1607,9 +1607,6 @@ namespace BrgRenderSystem
 
             // if (occlusionCullingCommon != null)
             //     occlusionCullingCommon.UpdateSilhouettePlanes(cc.viewID.GetInstanceID(), receiverPlanes.SilhouettePlaneSubArray());
-            OcclusionCullingProcessor occlusionBuffer = default;
-             if (cc.viewType == BatchCullingViewType.Camera)
-                 occlusionBuffer = OcclusionCullingProcessor.Create(cc.viewID.GetInstanceID());
 
             var cullingJob = new CullingJob
             {
@@ -1634,8 +1631,8 @@ namespace BrgRenderSystem
                 maxLOD = QualitySettings.maximumLODLevel,
                 cullingLayerMask = cc.cullingLayerMask,
                 sceneCullingMask = cc.sceneCullingMask,
-                isOcclusionTest = occlusionBuffer.valid,
-                occlusionBuffer = occlusionBuffer.valid ? occlusionBuffer : default,
+                isOcclusionTest = occlusionCullingCommon.valid,
+                occlusionBuffer = occlusionCullingCommon.valid ? occlusionCullingCommon : default,
             }.Schedule(instanceData.instancesLength, CullingJob.k_BatchSize);
 
             receiverPlanes.Dispose(cullingJob);
@@ -1688,7 +1685,7 @@ namespace BrgRenderSystem
             NativeArray<BatchID> batchIDs,
             int crossFadedRendererCount,
             float smallMeshScreenPercentage,
-            OcclusionCullingCommon occlusionCullingCommon)
+            OcclusionCullingProcessor occlusionCullingCommon)
         {
             // allocate for worst case number of draw ranges (all other arrays allocated after size is known)
             var drawCommands = new BatchCullingOutputDrawCommands();

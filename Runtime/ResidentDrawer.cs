@@ -155,6 +155,12 @@ namespace BrgRenderSystem
             set => m_BatchersContext.enabled = value;
         }
         
+        public bool occlusionCulling
+        {
+            get => m_BatchersContext.occlusionCulling;
+            set => m_BatchersContext.occlusionCulling = value;
+        }
+        
         public void RegisterLodGroup(ref LODGroupItem lodGroup)
         {
             m_SceneDataProcessor.RegisterLodGroup(ref lodGroup);

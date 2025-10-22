@@ -97,7 +97,28 @@ namespace BrgRenderSystem
             return data;
         }
         
-        public bool IsOcclusionVisible(float3 center, float radius)
+        BoundingObjectData CalculateBoundingObjectData(in AABB aabb)
+        {
+            float3 centerWS = aabb.center;
+            float3 halfSize = aabb.extents; // hx, hy, hz
+            float3 centerPosRWS = centerWS - viewOriginWorldSpace;
+
+            float3 radialVec = math.dot(halfSize, math.abs(radialDirWorldSpace)) * radialDirWorldSpace;
+            float3 facingVec = math.dot(halfSize, math.abs(facingDirWorldSpace)) * facingDirWorldSpace;
+
+            BoundingObjectData data;
+            data.centerPosNDC      = ComputeNormalizedDeviceCoordinatesWithZ(centerPosRWS, viewProjMatrix).xy;
+            data.radialPosNDC      = ComputeNormalizedDeviceCoordinatesWithZ(centerPosRWS + radialVec, viewProjMatrix).xy;
+            data.frontCenterPosRWS = centerPosRWS + facingVec;
+            return data;
+        }
+        
+        public bool IsOcclusionVisible(in AABB aabb)
+        {
+            return IsOcclusionVisible(CalculateBoundingObjectData(aabb));
+        }
+        
+        bool IsOcclusionVisible(float3 center, float radius)
         {
             return IsOcclusionVisible(CalculateBoundingObjectData(center,radius));
         }

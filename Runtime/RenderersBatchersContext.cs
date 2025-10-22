@@ -101,6 +101,8 @@ namespace BrgRenderSystem
         }
 
         public bool enabled { get; set; } = true;
+        public bool occlusionCulling { get; set; } = true;
+
         private InstanceDataSystem m_InstanceDataSystem;
 
         private LODGroupDataPool m_LODGroupDataPool;
