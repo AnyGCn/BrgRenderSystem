@@ -371,10 +371,6 @@ namespace BrgRenderSystem
             if (visibilityMask != 0 && receiverSplitInfos.Length > 0)
                 visibilityMask &= ReceiverSphereCuller.ComputeSplitVisibilityMask(lightFacingFrustumPlanes, receiverSplitInfos, worldToLightSpaceRotation, worldAABB);
 
-            // Perform an occlusion test on the instance bounds if we have an occlusion buffer available and the instance is still visible
-            if (visibilityMask != 0 && isOcclusionTest)
-                visibilityMask = occlusionBuffer.IsOcclusionVisible(worldAABB) ? visibilityMask : 0;
-
             return visibilityMask;
         }
 
@@ -424,6 +420,10 @@ namespace BrgRenderSystem
                     visibilityMask = 0;
                 }
             }
+
+            // Perform an occlusion test on the instance bounds if we have an occlusion buffer available and the instance is still visible
+            if (visibilityMask != 0 && isOcclusionTest && !occlusionBuffer.IsOcclusionVisible(instanceData.worldAABBs[instanceIndex]))
+                visibilityMask = 0;
 
             rendererVisibilityMasks[instance.index] = (byte)visibilityMask;
             rendererCrossFadeValues[instance.index] = (byte)crossFadeValue;
