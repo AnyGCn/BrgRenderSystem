@@ -19,7 +19,8 @@ namespace BrgRenderSystem
         private float4x4 viewProjMatrix; // [6];
         private float3 viewOriginWorldSpace;
         private float3 facingDirWorldSpace; // [6];
-        private float3 radialDirWorldSpace;
+        private float3 radialXDirWorldSpace;
+        private float3 radialYDirWorldSpace;
         
         float4 _DepthSizeInOccluderPixels;
         float4 _OccluderDepthPyramidSize;
@@ -43,7 +44,8 @@ namespace BrgRenderSystem
                 viewProjMatrix = frameData.viewProjMatrix,
                 viewOriginWorldSpace = frameData.viewOriginWorldSpace,
                 facingDirWorldSpace = frameData.facingDirWorldSpace,
-                radialDirWorldSpace = frameData.radialDirWorldSpace,
+                radialXDirWorldSpace = frameData.radialXDirWorldSpace,
+                radialYDirWorldSpace = frameData.radialYDirWorldSpace,
                 _DepthSizeInOccluderPixels = new float4(hzbOcclusion.topMipSize.x, hzbOcclusion.topMipSize.y, 1.0f / hzbOcclusion.topMipSize.x, 1.0f / hzbOcclusion.topMipSize.y),
                 _OccluderDepthPyramidSize = new float4(hzbOcclusion.totalSize.x, hzbOcclusion.totalSize.y, 1.0f / hzbOcclusion.totalSize.x, 1.0f / hzbOcclusion.totalSize.y),
             };
@@ -87,7 +89,7 @@ namespace BrgRenderSystem
         {
             float3 centerPosRWS = center - viewOriginWorldSpace.xyz;
 
-            float3 radialVec = radius * radialDirWorldSpace.xyz;
+            float3 radialVec = radius * (radialXDirWorldSpace.xyz + radialYDirWorldSpace.xyz);
             float3 facingVec = radius * facingDirWorldSpace.xyz;
 
             BoundingObjectData data;
@@ -103,7 +105,8 @@ namespace BrgRenderSystem
             float3 halfSize = aabb.extents; // hx, hy, hz
             float3 centerPosRWS = centerWS - viewOriginWorldSpace;
 
-            float3 radialVec = math.dot(halfSize, math.abs(radialDirWorldSpace)) * radialDirWorldSpace;
+            float3 radialVec = math.dot(halfSize, math.abs(radialXDirWorldSpace)) * radialXDirWorldSpace
+                               + math.dot(halfSize, math.abs(radialYDirWorldSpace)) * radialYDirWorldSpace;
             float3 facingVec = math.dot(halfSize, math.abs(facingDirWorldSpace)) * facingDirWorldSpace;
 
             BoundingObjectData data;
@@ -132,21 +135,39 @@ namespace BrgRenderSystem
         {
             if (math.dot(frontCenterPosRWS, facingDirWorldSpace.xyz) >= 0)
                 return true;
-            
-            float2 centerCoordInTopMip = centerPosNDC * _DepthSizeInOccluderPixels.xy;
-            float radiusInPixels = math.length((radialPosNDC - centerPosNDC) * _DepthSizeInOccluderPixels.xy);
+
+            float2 rightTop = radialPosNDC;
+            float2 leftBottom = 2 * centerPosNDC - radialPosNDC;
+            float radiusInPixels = math.cmax((rightTop - leftBottom) * _DepthSizeInOccluderPixels.xy);
             int mipLevel = math.clamp(Mathf.CeilToInt(math.log2(radiusInPixels)), 0, _OccluderMipBounds.Length - 1);
-            float2 centerCoordInChosenMip = centerCoordInTopMip * math.exp2(-mipLevel);
-            float4 gatherDepths = GatherTexture2D(centerCoordInChosenMip, _OccluderMipBounds[mipLevel]);
+            float4 gatherDepths = GatherTexture2D(leftBottom * _DepthSizeInOccluderPixels.xy, rightTop * _DepthSizeInOccluderPixels.xy, mipLevel);
             float occluderDepth = FarthestDepth(gatherDepths);
             float queryClosestDepth = ComputeNormalizedDeviceCoordinatesWithZ(frontCenterPosRWS, viewProjMatrix).z;
             return IsVisibleAfterOcclusion(occluderDepth, queryClosestDepth);
         }
         
-        float4 GatherTexture2D(float2 centerCoordInChosenMip, int4 mipBounds)
+        float4 GatherTexture2D(float2 leftBottom, float2 rightTop, int mipLevel)
         {
+            float downSampleSize = math.exp2(-mipLevel);
+            leftBottom *= downSampleSize;
+            rightTop *= downSampleSize;
+            int4 mipBounds = _OccluderMipBounds[mipLevel];
+            int2 coordLB = (int2)math.floor(new float2(mipBounds.xy) + math.clamp(leftBottom, .5f, new float2(mipBounds.zw) - .5f));
+            int2 coordRT = (int2)math.floor(new float2(mipBounds.xy) + math.clamp(rightTop, .5f, new float2(mipBounds.zw) - .5f));
+            return new float4(
+                LoadDepthFromTexture(new int2(coordLB.x, coordLB.y)),
+                LoadDepthFromTexture(new int2(coordLB.x, coordRT.y)),
+                LoadDepthFromTexture(new int2(coordRT.x, coordRT.y)),
+                LoadDepthFromTexture(new int2(coordRT.x, coordLB.y)));
+        }
+        
+        float4 GatherTexture2D(float2 centerCoord, int mipLevel)
+        {
+            float downSampleSize = math.exp2(-mipLevel);
+            centerCoord *= downSampleSize;
+            int4 mipBounds = _OccluderMipBounds[mipLevel];
             int2 coordLeftBottom = (int2)math.floor(new float2(mipBounds.xy) +
-                                                    math.clamp(centerCoordInChosenMip, .5f,
+                                                    math.clamp(centerCoord, .5f,
                                                         new float2(mipBounds.zw) - .5f));
             int2 mipMax = mipBounds.xy + mipBounds.zw;
             return new float4(
