@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 namespace BrgRenderSystem
 {
     // All this is just a copy of C++ LODGroupManager code.
-    internal static class LODGroupRenderingUtils
+    public static class LODGroupRenderingUtils
     {
         public static float CalculateFOVHalfAngle(float fieldOfView)
         {

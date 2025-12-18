@@ -128,8 +128,8 @@ namespace BrgRenderSystem.Tests
                 lodGroupID = -1,
                 lastLODIsBillboard = false,
                 fadeMode = lodGroup.fadeMode,
-                worldSpaceSize = lodGroup.size,
-                worldSpaceReferencePoint = lodGroup.transform.position
+                worldSpaceSize = lodGroup.GetWorldSpaceSize(),
+                worldSpaceReferencePoint = lodGroup.GetWorldReferencePoint(),
             };
 
             int renderersCount = 0;

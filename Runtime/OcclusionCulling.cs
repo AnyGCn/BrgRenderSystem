@@ -143,6 +143,7 @@ namespace BrgRenderSystem
             float4 gatherDepths = GatherTexture2D(leftBottom * _DepthSizeInOccluderPixels.xy, rightTop * _DepthSizeInOccluderPixels.xy, mipLevel);
             float occluderDepth = FarthestDepth(gatherDepths);
             float queryClosestDepth = ComputeNormalizedDeviceCoordinatesWithZ(frontCenterPosRWS, viewProjMatrix).z;
+            queryClosestDepth = isReversedZ ? queryClosestDepth : (queryClosestDepth * 0.5f + 0.5f);
             return IsVisibleAfterOcclusion(occluderDepth, queryClosestDepth);
         }
         
